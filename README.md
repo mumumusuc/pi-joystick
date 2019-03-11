@@ -147,6 +147,8 @@ pi0的linux内核中(4.14.95)默认编译了g_hid模块，可以直接加载。
 > TODO
 	
 ### 参考项目
-	[Switch-Fightstick](https://github.com/progmem/Switch-Fightstick )
-	[SwitchInputEmulator](https://github.com/wchill/SwitchInputEmulator )
+
+[Switch-Fightstick](https://github.com/progmem/Switch-Fightstick )
+
+[SwitchInputEmulator](https://github.com/wchill/SwitchInputEmulator )
 
