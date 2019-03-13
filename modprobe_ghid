@@ -1,0 +1,3 @@
+#!/bin/sh 
+
+modprobe g_hid bcdDevice=0x0572 idVendor=0x0f0d idProduct=0x00c1 iProduct="HORIPAD S" iManufacturer="HORI CO.,LTD."

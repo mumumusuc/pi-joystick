@@ -62,6 +62,22 @@ pi0的linux内核中(4.14.95)默认编译了g_hid模块，可以直接加载。
     + 交叉编译
     
         请自行搜索搭建树莓派的交叉编译环境，并保证源码版本与树莓派内核版本一致。
+    + 内核中没有g_hid模块时
+        如果pi-zero的内核中并没有编译g_hid模块，可以修改Makefile中
+        ```
+        obj-m += joystick.o
+        ```
+        为
+        ```
+        obj-m += joystick_driver.o
+        ```
+        连同hid驱动一起编译并加载
+        ```
+        # make
+        # insmod joystick_driver.ko
+        ```
+        关于hid驱动详情请参考linux源码
+        > drivers/usb/gadget/legacy/hid.c
 2. 加载
 
 	```
@@ -142,9 +158,11 @@ pi0的linux内核中(4.14.95)默认编译了g_hid模块，可以直接加载。
 # echo -ne "\x02\x00\x00\x00\x00\x00\x00\x00" > /dev/hidg0
 ```
 
-![joystick](https://github.com/mumumusuc/pi-joystick/blob/master/image/switch.gif)
+![简单的GUI测试](https://github.com/mumumusuc/pi-joystick/blob/master/image/switch.gif)
 
-> TODO
+用python+vue可以简单快速的搭建一个图形测试环境，项目中使用的是Sanic后端与vue前端的组合，延迟会相对较大，可用的GUI程序运行在本地会更为合适。
+
+
 	
 ### 参考项目
 

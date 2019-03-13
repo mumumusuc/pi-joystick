@@ -57,3 +57,8 @@ cmake-build-debug
 # IDE
 .idea
 build
+
+# web
+.idea
+node_modules
+test

@@ -1,4 +1,4 @@
-obj-m += joystick.o
+obj-m += joystick_driver.o
 
 HEAD := $(shell uname -r)
 #KERNEL := /usr/src/linux-headers-$(HEAD)/
