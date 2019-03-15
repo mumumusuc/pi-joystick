@@ -11,10 +11,16 @@ new Vue({
   el: '#app',
   components: {App},
   template: '<App/>',
-
+  mounted () {
+    const selector = '.mdc-button, .mdc-fab';
+    [].map.call(document.querySelectorAll(selector), function (el) {
+      mdc.ripple.MDCRipple.attachTo(el)
+    })
+    const icon_buttons = document.querySelectorAll('.mdc-icon-button')
+    for (let icon of icon_buttons) {
+      let instance = new mdc.ripple.MDCRipple(icon)
+      instance.unbounded = true
+    }
+  }
 })
 
-const selector = '.mdc-button, .mdc-icon-button, .mdc-fab';
-[].map.call(document.querySelectorAll(selector), function (el) {
-  mdc.ripple.MDCRipple.attachTo(el)
-})

@@ -1,6 +1,6 @@
 <template>
   <div id="app" class="center_content">
-    <Gamepad style="display: flex"/>
+    <Gamepad/>
   </div>
 </template>
 
@@ -22,11 +22,10 @@
   .center_content {
     width: 100%;
     height: 100%;
-    //padding: 16px;
     display: flex;
     display: -webkit-flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-items: center;
     align-items: center;
   }
 

@@ -43,8 +43,6 @@ async def feed(request, ws):
         '''
         button_low = data['Y']|(data['B']<<1)|(data['A']<<2)|(data['X']<<3)|(data['L']<<4)|(data['R']<<5)|(data['ZL']<<6)|(data['ZR']<<7)
         button_hi = data['SELECT']|(data['START']<<1)|(data['LS']<<2)|(data['RS']<<3)|(data['HOME']<<4)|(data['CAP']<<5)
-        if data['CONNECT']:
-            button_hi = 48
         hat = 8
         if data['UP']:
             hat = 0

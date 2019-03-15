@@ -1,20 +1,25 @@
 <template>
   <div class="mdc-card card-size">
-    <div class="mdc-card__media  card-content">
-      <div class="demo-card__primary">
-        <h2 class="demo-card__title mdc-typography mdc-typography--body1">Switch Gamepad</h2>
-      </div>
+    <h2 class="mdc-typography mdc-typography--headline6">Switch Gamepad</h2>
 
-      <div id="gamepad_container" @resize="resizeCanvas()" @mousemove="getCanvasPosition($event)"
-           @mouseout="clearCanvasPosition()">
-        <canvas id="gamepad" :width="width" :height="height" class="gamepad-canvas"></canvas>
-      </div>
+    <div class="mdc-card__media mdc-card__media--16-9 card-header card-content"/>
 
+    <div class="card-content">
+      <button @click="connect" class="mdc-button mdc-button--unelevated demo-button-shaped">
+        <i class="material-icons mdc-button__icon">videogame_asset</i>
+        <span class="mdc-button__label">connect</span>
+      </button>
+    </div>
+
+    <div>
+      <hr>
+    </div>
+
+    <div class="card-content">
       <button v-for="(value, key) in buttons" class="mdc-icon-button"
-              @mousedown="button_down(key)" @mouseup="button_up(key)">
+              @mousedown="button_down(key)" @mouseup="button_up(key)" @touchstart="button_down(key)" @touchend="button_up(key)">
         <i class="material-icons mdc-icon-button__icon">{{value.icon}}</i>
       </button>
-
     </div>
 
   </div>
@@ -50,28 +55,10 @@
           CAP: {icon: 'panorama_fish_eye', value: false},
           START: {icon: 'add', value: false},
           SELECT: {icon: 'remove', value: false},
-          CONNECT: {icon: 'videogame_asset', value: false},
         },
       }
     },
     mounted () {
-      this.resizeCanvas()
-      let canvas = document.querySelector('#gamepad')
-      let context = canvas.getContext('2d')
-      this.bg.src = require('../assets/gamepad.png')
-      this.bg.onload = () => {
-        context.drawImage(this.bg,
-          0, 0, this.bg.width, this.bg.height,
-          0, 0, this.width, this.height)
-      }
-      const $this = this
-      window.onresize = () => {
-        return (() => {
-          window.screenWidth = document.body.clientWidth
-          window.screenHeight = document.body.clientHeight
-          $this.resizeCanvas()
-        })()
-      }
       this.websocket = new WebSocket(this.wsUri)
       this.websocket.onopen = (e) => {
         console.log(`socket open`)
@@ -87,12 +74,25 @@
       }
     },
     methods: {
+      connect () {
+        if (this.websocket.readyState != 1) {
+          return
+        }
+        this.buttons.L.value = true
+        this.buttons.R.value = true
+        this.update()
+        window.setTimeout(function () {
+          this.buttons.L.value = false
+          this.buttons.R.value = false
+          this.update()
+        }, 100)
+      },
       update () {
         let data = {}
         for (let key in this.buttons) {
           data[key] = this.buttons[key].value
         }
-        console.log(`data = ${JSON.stringify(data)}`)
+        //console.log(`data = ${JSON.stringify(data)}`)
         if (this.websocket.readyState == 1) {
           this.websocket.send(JSON.stringify(data))
         }
@@ -105,38 +105,6 @@
         this.buttons[id].value = false
         this.update()
       },
-      getCanvasPosition (e) {
-        /*
-        let canvas = document.querySelector('#gamepad')
-        let context = canvas.getContext('2d')
-        let rect = canvas.getBoundingClientRect()
-        let x = e.clientX - rect.left
-        let y = e.clientY - rect.top
-
-        context.fillStyle = 'white'
-        context.fillRect(0, 0, this.width, this.height)
-
-        context.fillStyle = '#aaaaaa'
-        context.beginPath()
-        context.arc(x, y, 5, 0, Math.PI * 2, true)
-        context.closePath()
-        context.fill()
-        context.drawImage(this.bg,
-          0, 0, this.bg.width, this.bg.height,
-          0, 0, this.width, this.height)
-          */
-      }
-      ,
-      clearCanvasPosition () {
-
-      },
-      resizeCanvas () {
-        let container = document.querySelector('#gamepad_container')
-        let rect = container.getBoundingClientRect()
-        this.width = rect.width
-        this.height = rect.width * this.ratio
-        //console.log(`width[${this.width}] , height[${this.height}]`)
-      }
     }
   }
 </script>
@@ -159,12 +127,16 @@
     margin: 4px;
   }
 
-  .card-content {
-    //height: fit-content;
-    //background-size: auto;
-    //background-image: url(../assets/gamepad.png);
+  .card-header {
+    background-size: contain;
+    background-image: url(../assets/gamepad.png);
   }
 
-  #gamepad_container {
+  .card-content {
+    margin: 8px;
+  }
+
+  .demo-button-shaped {
+    border-radius: 18px;
   }
 </style>
