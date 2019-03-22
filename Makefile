@@ -13,8 +13,8 @@ all:
 clean:
 	make -C $(KERNEL) M=$(PWD) clean
 install:
-	-rmmod joystick
-	-insmod joystick.ko
+	-rmmod js-audio
+	-insmod js-audio.ko
 uninstall:
-	-rmmod joystick
+	-rmmod js-audio
 

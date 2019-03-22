@@ -1,52 +1,34 @@
 # pi zero joystick
-**测试环境 raspberry-zero-w with Linux/arm 4.14.95 kernel**
+**测试环境 raspberry-zero-w with Linux/arm 4.14.95+ kernel**
 
 ### 配置pi-zero
 **若已配置了dwc2,g_ether则需要配置pi0其他的连接方式**
 
 1. 开启dwc2
-    ```
-    # echo "dtoverlay=dwc2" >> /boot/config.txt
-    ```
-    或直接编辑/boot/config.txt文件，在文末添加
+    在/boot/config.txt文末添加
     `dtoverlay=dwc2`
 
 2. 开机加载libcomposite
-    ```
-    # echo "libcomposite" >> /etc/modules
-    ```
-    或直接编辑/etc/modules文件，在文末添加
+    在/etc/modules文末添加
     `libcomposite`
     
-### 加载g_hid驱动 
-pi0的linux内核中(4.14.95)默认编译了g_hid模块，可以直接加载。
-```
-# modprobe g_hid bcdDevice=0x0572 idVendor=0x0f0d idProduct=0x00c1 iProduct="HORIPAD S" iManufacturer="HORI CO.,LTD."
-```
-成功后`dmesg`可以看到类似以下的内核信息
-```
-[10369.856626] g_hid gadget: HID Gadget, version: 2010/03/16
-[10369.856644] g_hid gadget: g_hid ready
-[10369.856657] dwc2 20980000.usb: bound driver g_hid
-[10370.056493] dwc2 20980000.usb: new device is high-speed
-[10370.184605] dwc2 20980000.usb: new device is high-speed
-[10370.261554] dwc2 20980000.usb: new address 29
-[10370.282458] g_hid gadget: high-speed config #1: HID Gadget
-```
-
-### 加载本模块(joystick.ko)
+### 加载模块
 1. 编译
 
     **CMakeLists.txt仅用于IDE浏览，不能进行编译**
     + 本地编译
     
         下载完整的linux-headers
+        
         ```
         apt install raspberrypi-kernel-headers
         ```
+        
         修改Makefile
+        
         ```
-        obj-m += joystick.o
+        obj-m += js-audio.o
+        js-audio-objs = driver.o audio.o joystick.o
         HEAD := $(shell uname -r)
         KERNEL := /usr/src/linux-headers-$(HEAD)/
         PWD := $(shell pwd) 
@@ -55,34 +37,37 @@ pi0的linux内核中(4.14.95)默认编译了g_hid模块，可以直接加载。
         clean:
         	make -C $(KERNEL) M=$(PWD) clean
         ```
+        
         编译
+        
         ```
         make
         ```
+        
     + 交叉编译
     
         请自行搜索搭建树莓派的交叉编译环境，并保证源码版本与树莓派内核版本一致。
-    + 内核中没有g_hid模块时
-        如果pi-zero的内核中并没有编译g_hid模块，可以修改Makefile中
-        ```
-        obj-m += joystick.o
-        ```
-        为
-        ```
-        obj-m += joystick_driver.o
-        ```
-        连同hid驱动一起编译并加载
-        ```
-        # make
-        # insmod joystick_driver.ko
-        ```
-        关于hid驱动详情请参考linux源码
-        > drivers/usb/gadget/legacy/hid.c
-2. 加载
+  
+2. 配置udev
+
+    复制规则文件到pi-zero中
+    
+    ```
+    # cp ./udev/50-joystick.rules /etc/udev/rules.d/
+    ```
+    更新规则
+    
+    ```
+    # sudo udevadm control --reload-rules
+    # sudo udevadm trigger
+    ```
+    
+3. 加载
 
 	```
-    # insmod joystick.ko
+    # insmod js-audio.ko
 	```
+	
 	或
 	
     ```
@@ -94,18 +79,13 @@ pi0的linux内核中(4.14.95)默认编译了g_hid模块，可以直接加载。
     ```
     # ls -al /dev/hid*
     
-    crw------- 1 root root 243, 0 3月  11 17:38 /dev/hidg0
+    crw-rw-rw- 1 root root 243, 0 3月  11 17:38 /dev/hidg0
     ```
     
-    利用udev或直接修改设备权限
-    
-    ```
-    # chmod 666 /dev/hidg0
-    ```
 3. 卸载
 
 	```
-    # rmmod joystick.ko
+    # rmmod js-audio.ko
 	```
 	
 	或
@@ -117,7 +97,6 @@ pi0的linux内核中(4.14.95)默认编译了g_hid模块，可以直接加载。
 ### 主机端的测试(Ubuntu18.04)
 
 以上步骤成功的话于host端会看到类似内核信息
-    
     
 ```
     # dmesg
@@ -162,7 +141,40 @@ pi0的linux内核中(4.14.95)默认编译了g_hid模块，可以直接加载。
 
 用python+vue可以简单快速的搭建一个图形测试环境，项目中使用的是Sanic后端与vue前端的组合，延迟会相对较大，可用的GUI程序运行在本地会更为合适。
 
+### 模拟声卡(New)
 
+事实上Nintendo Switch是支持Gadget复合设备的，可以在此基础上实现Joystick/Audio复合设备。
+从[USB DAC with new 4.0 update](https://www.reddit.com/r/NintendoSwitch/comments/77whjd/usb_dac_with_new_40_update/?utm_source=BD&utm_medium=Search&utm_name=Bing&utm_content=PSR1)可以了解到switch支持了UAC1.0规范，而pi-zero的默认内核实现的UAC2.0，所以直接加载g_audio模块连接到switch上是不会被识别的。
+
+1. 重新编译树莓派的linux内核(是否必要？)
+
+    在路径 
+
+    > Device Drivers > USB support > USB Gadget Support
+    
+    下选中
+    
+    > UAC 1.0
+
+    ![编译支持UAC 1.0](https://github.com/mumumusuc/pi-joystick/blob/master/image/pi_1.png)
+	
+	保存配置后重新编译内核安装即可
+	
+2. 测试USB声卡
+
+    在主机端查看内核信息或者进入设置中的声音选项可以看到pi-zero模拟的声卡设备信息
+   
+    ![模拟USB声卡](https://github.com/mumumusuc/pi-joystick/blob/master/image/pi_2.png)
+	
+3. 连接到Nintendo Switch！
+
+    ![连接](https://github.com/mumumusuc/pi-joystick/blob/master/image/pi_3.png)
+    
+    看来switch已经把pi-zero模拟的复合设备分别识别为手柄和USB声卡了。	
+	
+### 转接PS4蓝牙手柄(?)
+
+>TBD
 	
 ### 参考项目
 
