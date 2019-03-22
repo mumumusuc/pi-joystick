@@ -1,4 +1,5 @@
-obj-m += joystick_driver.o
+obj-m += js-audio.o
+js-audio-objs = driver.o audio.o joystick.o
 
 HEAD := $(shell uname -r)
 #KERNEL := /usr/src/linux-headers-$(HEAD)/

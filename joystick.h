@@ -3,13 +3,9 @@
 
 #include <linux/usb/g_hid.h>
 
-#define HIDG_VENDOR_NUM     0x0f0d
-#define HIDG_PRODUCT_NUM    0x00c1
-#define BCD_DEVICE          0x0572
 #define MANUFACTURER        "HORI CO.,LTD."
 #define PRODUCT             "HORIPAD S"
 #define SERIAL              ""
-#define DRIVER_DESC         "HID Joystick"
 
 #define DEBUG   0
 #if DEBUG

@@ -17,7 +17,8 @@
 
     <div class="card-content">
       <button v-for="(value, key) in buttons" class="mdc-icon-button"
-              @mousedown="button_down(key)" @mouseup="button_up(key)" @touchstart="button_down(key)" @touchend="button_up(key)">
+              @mousedown="button_down(key)" @mouseup="button_up(key)" @touchstart="button_down(key)"
+              @touchend="button_up(key)">
         <i class="material-icons mdc-icon-button__icon">{{value.icon}}</i>
       </button>
     </div>
@@ -81,10 +82,11 @@
         this.buttons.L.value = true
         this.buttons.R.value = true
         this.update()
+        let that = this
         window.setTimeout(function () {
-          this.buttons.L.value = false
-          this.buttons.R.value = false
-          this.update()
+          that.buttons.L.value = false
+          that.buttons.R.value = false
+          that.update()
         }, 100)
       },
       update () {

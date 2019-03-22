@@ -53,6 +53,7 @@ dkms.conf
 
 # CMake
 cmake-build-debug
+.cache.mk
 
 # IDE
 .idea
