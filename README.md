@@ -174,7 +174,7 @@
 	
 ### 转接PS4蓝牙手柄(?)
 
->TBD
+我的另一项目[pi-ds4-dongle](https://github.com/mumumusuc/pi-ds4-dongle)
 	
 ### 参考项目
 
