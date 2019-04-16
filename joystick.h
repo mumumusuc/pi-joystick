@@ -3,10 +3,6 @@
 
 #include <linux/usb/g_hid.h>
 
-#define MANUFACTURER        "HORI CO.,LTD."
-#define PRODUCT             "HORIPAD S"
-#define SERIAL              ""
-
 #define DEBUG   0
 #if DEBUG
 #define debug(fmt, ...) printk(KERN_DEBUG"[%s] "fmt"\n", __func__,##__VA_ARGS__)

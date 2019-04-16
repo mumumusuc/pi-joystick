@@ -146,7 +146,7 @@
 事实上Nintendo Switch是支持Gadget复合设备的，可以在此基础上实现Joystick/Audio复合设备。
 从[USB DAC with new 4.0 update](https://www.reddit.com/r/NintendoSwitch/comments/77whjd/usb_dac_with_new_40_update/?utm_source=BD&utm_medium=Search&utm_name=Bing&utm_content=PSR1)可以了解到switch支持了UAC1.0规范，而pi-zero的默认内核实现的UAC2.0，所以直接加载g_audio模块连接到switch上是不会被识别的。
 
-1. 重新编译树莓派的linux内核(是否必要？)
+1. 重新编译树莓派的linux内核(<del>是否必要？</del>)
 
     在路径 
 
@@ -172,9 +172,19 @@
     
     看来switch已经把pi-zero模拟的复合设备分别识别为手柄和USB声卡了。	
 	
-### 转接PS4蓝牙手柄(?)
+### 模拟Joy-Con与Pro手柄(New)
 
-我的另一项目[pi-ds4-dongle](https://github.com/mumumusuc/pi-ds4-dongle)
+关于Joy-Con可以参照这个著名的逆向工程[Nintendo_Switch_Reverse_Engineering](https://github.com/dekuNukem/Nintendo_Switch_Reverse_Engineering)，
+也可以参照我dump的Pro设备描述符[pro-hid-descriptor.txt](https://github.com/mumumusuc/pi-joystick/blob/master/pro-hid-descriptor.txt)。
+
+相对于Hori的手柄，NS的Pro提供了更加复杂和丰富的设备指令，包括HD震动、红外摄像头、陀螺仪与加速度传感器等，并且可以自行配置手柄在系统中的颜色显示。当然，协议也是相当复杂。
+相关驱动我追加在了[pi-ds4-dongle](https://github.com/mumumusuc/pi-ds4-dongle)。
+
+![模拟的Pro手柄](https://github.com/mumumusuc/pi-joystick/blob/master/image/pro.jpg)
+	
+### 转接PS4蓝牙手柄
+
+我的另一项目[pi-ds4-dongle](https://github.com/mumumusuc/pi-ds4-dongle)。
 	
 ### 参考项目
 

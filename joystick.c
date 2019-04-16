@@ -9,7 +9,8 @@
 #include <linux/usb/g_hid.h>
 #include <linux/hid.h>
 #include <linux/usb/composite.h>
-#include "joystick.h"
+#include <linux/cdev.h>
+#include "switch-pro.h"
 
 /* from u_hid.h */
 struct f_hid_opts {
@@ -25,6 +26,36 @@ struct f_hid_opts {
     int refcnt;
 };
 
+struct f_hidg {
+    /* configuration */
+    unsigned char bInterfaceSubClass;
+    unsigned char bInterfaceProtocol;
+    unsigned char protocol;
+    unsigned short report_desc_length;
+    char *report_desc;
+    unsigned short report_length;
+
+    /* recv report */
+    struct list_head completed_out_req;
+    spinlock_t read_spinlock;
+    wait_queue_head_t read_queue;
+    unsigned int qlen;
+
+    /* send report */
+    spinlock_t write_spinlock;
+    bool write_pending;
+    wait_queue_head_t write_queue;
+    struct usb_request *req;
+
+    int minor;
+    struct cdev cdev;
+    struct usb_function func;
+
+    struct usb_ep *in_ep;
+    struct usb_ep *out_ep;
+};
+
+
 struct hidg_func_dev {
     struct usb_function_instance *func_instance;
     struct usb_function *func;
@@ -35,7 +66,7 @@ struct hidg_func_dev {
 
 #if DEBUG
 
-void check_confs(struct usb_function *func) {
+void check_confs(struct usb_configuration *c, struct usb_function *func) {
     int i, size;
     u8 *tmp;
     struct usb_interface_descriptor *hidg_interface_desc = (struct usb_interface_descriptor *) func->hs_descriptors[0];
@@ -59,6 +90,8 @@ void check_confs(struct usb_function *func) {
     for (i = 0; i < size; i++) {
         printk("0x%02X, ", *(tmp + i));
     }
+    debug("bmAttributes = %02X,(INT=%02X,BULK=%02X)", hidg_hs_in_ep_desc->bmAttributes, USB_ENDPOINT_XFER_INT,
+          USB_ENDPOINT_XFER_BULK);
     printk("\n");
     debug("hidg_hs_out_ep_desc[%d]:\n", size = hidg_hs_out_ep_desc->bLength);
     tmp = (u8 *) hidg_hs_out_ep_desc;
@@ -66,6 +99,29 @@ void check_confs(struct usb_function *func) {
         printk("0x%02X, ", *(tmp + i));
     }
     printk("\n");
+
+    hidg_hs_in_ep_desc->bmAttributes |= USB_ENDPOINT_XFER_BULK;
+    hidg_hs_out_ep_desc->bmAttributes |= USB_ENDPOINT_XFER_BULK;
+
+    struct usb_ep *ep;
+    struct f_hidg *hidg = container_of(func, struct f_hidg, func);
+    ep = usb_ep_autoconfig(c->cdev->gadget, hidg_hs_in_ep_desc);
+    if (!ep)
+        goto fail;
+    hidg->in_ep = ep;
+
+    ep = usb_ep_autoconfig(c->cdev->gadget, hidg_hs_out_ep_desc);
+    if (!ep)
+        goto fail;
+    hidg->out_ep = ep;
+
+    return;
+
+    fail:
+    ERROR(func->config->cdev, "hidg_bind FAILED\n");
+    if (hidg->req != NULL)
+        debug("free_ep_req");
+    //free_ep_req(hidg->in_ep, hidg->req);
 }
 
 #endif
@@ -80,7 +136,7 @@ int joystick_config(struct usb_configuration *c) {
     if (status < 0)
         goto put;
 #if DEBUG
-    check_confs(e->func);
+    check_confs(c, entry.func);
 #endif
     return 0;
 
@@ -91,18 +147,17 @@ int joystick_config(struct usb_configuration *c) {
 }
 
 int joystick_bind(struct usb_composite_dev *cdev) {
-    struct hidg_func_dev *n = &entry, *m;
     struct f_hid_opts *hid_opts;
     debug();
-    n->func_instance = usb_get_function_instance("hid");
-    if (IS_ERR(n->func_instance))
-        return PTR_ERR(n->func_instance);
-    hid_opts = container_of(n->func_instance, struct f_hid_opts, func_inst);
-    hid_opts->subclass = n->func_descriptor->subclass;
-    hid_opts->protocol = n->func_descriptor->protocol;
-    hid_opts->report_length = n->func_descriptor->report_length;
-    hid_opts->report_desc_length = n->func_descriptor->report_desc_length;
-    hid_opts->report_desc = n->func_descriptor->report_desc;
+    entry.func_instance = usb_get_function_instance("hid");
+    if (IS_ERR(entry.func_instance))
+        return PTR_ERR(entry.func_instance);
+    hid_opts = container_of(entry.func_instance, struct f_hid_opts, func_inst);
+    hid_opts->subclass = entry.func_descriptor->subclass;
+    hid_opts->protocol = entry.func_descriptor->protocol;
+    hid_opts->report_length = entry.func_descriptor->report_length;
+    hid_opts->report_desc_length = entry.func_descriptor->report_desc_length;
+    hid_opts->report_desc = entry.func_descriptor->report_desc;
     return 0;
 }
 
