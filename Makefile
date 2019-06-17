@@ -2,11 +2,11 @@ obj-m += js-audio.o
 js-audio-objs = driver.o audio.o joystick.o
 
 HEAD := $(shell uname -r)
-#KERNEL := /usr/src/linux-headers-$(HEAD)/
-KERNEL := /home/mumumusuc/raspberry/linux/
+KERNEL := /usr/src/linux-headers-$(HEAD)/
+#KERNEL := /home/mumumusuc/raspberry/linux/
 PWD := $(shell pwd)
 
-CC = arm-linux-gnueabihf-gcc
+#CC = arm-linux-gnueabihf-gcc
 
 all:
 	make -C $(KERNEL) M=$(PWD) modules

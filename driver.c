@@ -5,12 +5,6 @@
 
 #define DRIVER_DESC             "Joystick/Audio Gadget"
 #define DRIVER_VERSION          "March 22, 2019"
-#define ID_VENDOR               0x057e//0x0f0d
-#define ID_PRODUCT              0x2009//0x00c1
-#define BCD_DEVICE              0x0200//0x0572
-#define I_MANUFACTURER          "Nintendo Co., Ltd."
-#define I_PRODUCT               "Pro Controller"
-#define I_SERIAL_NUM            "000000000001"
 
 static struct usb_string strings_dev[] = {
         [USB_GADGET_MANUFACTURER_IDX].s = I_MANUFACTURER,
@@ -53,9 +47,9 @@ static struct usb_device_descriptor device_desc = {
         .bDeviceSubClass    = 0x02,
         .bDeviceProtocol    = 0x01,
         .bcdUSB             = cpu_to_le16(0x0200),
-        .idVendor           = cpu_to_le16(ID_VENDOR),
-        .idProduct          = cpu_to_le16(ID_PRODUCT),
-        .bcdDevice          = cpu_to_le16(BCD_DEVICE),
+        .idVendor           = cpu_to_le16(_ID_VENDOR),
+        .idProduct          = cpu_to_le16(_ID_PRODUCT),
+        .bcdDevice          = cpu_to_le16(_BCD_DEVICE),
         .bNumConfigurations = 1,
 };
 

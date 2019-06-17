@@ -3,14 +3,14 @@
 
 #include <linux/usb/g_hid.h>
 
-#define DEBUG   1
-#if DEBUG
-#define debug(fmt, ...) printk(KERN_DEBUG"[%s] "fmt"\n", __func__,##__VA_ARGS__)
-#else
-#define debug(fmt, ...)  {}
-#endif
+#define _ID_VENDOR               0x057e
+#define _ID_PRODUCT              0x2009
+#define _BCD_DEVICE              0x0200
+#define I_MANUFACTURER          "Nintendo Co., Ltd."
+#define I_PRODUCT               "Pro Controller"
+#define I_SERIAL_NUM            "000000000001"
 
-struct hidg_func_descriptor joystick_data = {
+static struct hidg_func_descriptor joystick_data = {
         .subclass           = 0,
         .protocol           = 0,
         .report_length      = 64,

@@ -10,7 +10,7 @@
 #include <linux/hid.h>
 #include <linux/usb/composite.h>
 #include <linux/cdev.h>
-#include "switch-pro.h"
+#include "joystick.h"
 
 /* from u_hid.h */
 struct f_hid_opts {

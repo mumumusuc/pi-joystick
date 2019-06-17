@@ -1,6 +1,8 @@
 #ifndef HID_DRIVER_H
 #define HID_DRIVER_H
 
+#include "joystick.h"
+
 int audio_bind(struct usb_composite_dev *);
 
 int audio_unbind(struct usb_composite_dev *);
